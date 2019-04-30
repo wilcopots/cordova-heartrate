@@ -1,5 +1,5 @@
 {
-  "name": "cordova-plugin-heartbeat",
+  "name": "cordova-heartbeat",
   "version": "0.0.1",
   "description": "Heartrate cordova plugin",
   "main": "www/heartbeat.js",

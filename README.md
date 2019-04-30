@@ -9,7 +9,7 @@ To install the plugin to your Cordova project use the Cordova CLI Tool:
 
 ```
 #!bash
-$ cordova plugin add cordova-plugin-heartbeat
+$ cordova plugin add cordova-heartbeat
 ```
 
 ## Basic Usage
