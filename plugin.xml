@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartrate" version="2.2.7">
-  <name>Heartrate plugin</name>
-  <description>Heartrate plugin</description>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat" version="0.0.3">
+  <name>HeartbeatPlugin</name>
+  <description>Heartbeat plugin</description>
 
   <js-module src="www/heartbeat.js" name="Heartbeat">
     <clobbers target="Heartbeat"/>
@@ -12,11 +12,11 @@
   <platform name="android">
     <config-file target="config.xml" parent="/*">
       <feature name="Heartbeat">
-        <param name="android-package" value="nl.aanzee.cordova.heartrate"/>
+        <param name="android-package" value="nl.aanzee.cordova.heartbeat"/>
       </feature>
     </config-file>
     <source-file src="src/android/libs/HeartBeatLibAndroid.aar" target-dir="libs" framework="true"/>
-    <source-file src="src/android/HeartbeatPlugin.java" target-dir="src/nl/aanzee/cordova/heartrate"/>
+    <source-file src="src/android/HeartbeatPlugin.java" target-dir="src/nl/aanzee/cordova/heartbeat"/>
     <source-file src="src/android/build-extras.gradle" target-dir="."/>
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.CAMERA" />

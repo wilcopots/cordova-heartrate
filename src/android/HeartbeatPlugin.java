@@ -1,4 +1,4 @@
-package nl.aanzee.cordova.heartrate;
+package nl.aanzee.cordova.heartbeat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import happitech.nl.heartbeatandroid.Interface.HeartBeatListener;
 import happitech.nl.heartbeatandroid.Monitor;
+import happitech.nl.heartbeatandroid.models.ClassifiedResult;
 import happitech.nl.heartbeatandroid.models.HRV;
 import happitech.nl.heartbeatandroid.models.HR;
 import happitech.nl.heartbeatandroid.models.Pulse;
@@ -239,7 +240,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHRVReady(HRV r) {
+  public void onHRVReady(HRV r, ClassifiedResult cr) {
     // Log.d(TAG, "onHRVReady:" + String.valueOf(r));
     JSONObject result = new JSONObject();
     try {
@@ -305,6 +306,13 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     }
     sendErrorResult("error", error);
   }
+
+    @Override
+    public void onWarning(Monitor.WARNING w) {
+        String status = "WARNING";
+        sendSuccessResult("status", status);
+    };
+
 
   @Override
   public void onStatusChange(Monitor.STATUS s) {

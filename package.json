@@ -1,7 +1,7 @@
 {
-  "name": "cordova-heartrate",
-  "version": "0.0.1",
-  "description": "Heartrate cordova plugin",
+  "name": "cordova-heartbeat",
+  "version": "0.0.3",
+  "description": "Heartbeat cordova plugin",
   "main": "www/heartbeat.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
