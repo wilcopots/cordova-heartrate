@@ -1,0 +1,14 @@
+{
+  "name": "cordova-plugin-heartbeat",
+  "version": "0.0.1",
+  "description": "Heartrate cordova plugin",
+  "main": "www/heartbeat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/wilcopots/cordova-heartrate.git"
+  },
+  "homepage": "https://github.com/wilcopots/cordova-heartrate#readme"
+}
