@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat" version="0.0.3">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat2" version="0.0.5">
   <name>HeartbeatPlugin</name>
   <description>Heartbeat plugin</description>
 
@@ -12,7 +12,7 @@
   <platform name="android">
     <config-file target="config.xml" parent="/*">
       <feature name="Heartbeat">
-        <param name="android-package" value="nl.aanzee.cordova.heartbeat"/>
+        <param name="android-package" value="nl.aanzee.cordova.heartbeat.HeartbeatPlugin"/>
       </feature>
     </config-file>
     <source-file src="src/android/libs/HeartBeatLibAndroid.aar" target-dir="libs" framework="true"/>
