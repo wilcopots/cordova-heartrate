@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat2" version="0.0.6">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat2" version="0.0.8">
   <name>HeartbeatPlugin</name>
   <description>Heartbeat plugin</description>
 
@@ -16,7 +16,7 @@
       </feature>
     </config-file>
     <source-file src="src/android/libs/HeartBeatLibAndroid.aar" target-dir="libs" framework="true"/>
-    <source-file src="src/android/HeartbeatPlugin.java" target-dir="src/nl/aanzee/cordova/heartbeat"/>
+    <source-file src="src/android/HeartbeatPlugin.java" target-dir="src/nl/trimbos/eva"/>
     <source-file src="src/android/build-extras.gradle" target-dir="."/>
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.CAMERA" />
