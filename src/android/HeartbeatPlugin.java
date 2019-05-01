@@ -1,4 +1,4 @@
-package nl.aanzee.cordova.heartbeat;
+package nl.trimbos.eva;
 
 import java.util.ArrayList;
 import java.util.Date;

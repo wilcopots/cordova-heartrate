@@ -12,7 +12,7 @@
   <platform name="android">
     <config-file target="config.xml" parent="/*">
       <feature name="Heartbeat">
-        <param name="android-package" value="nl.aanzee.cordova.heartbeat.HeartbeatPlugin"/>
+        <param name="android-package" value="nl.trimbos.eva.HeartbeatPlugin"/>
       </feature>
     </config-file>
     <source-file src="src/android/libs/HeartBeatLibAndroid.aar" target-dir="libs" framework="true"/>
