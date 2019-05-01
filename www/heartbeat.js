@@ -99,14 +99,20 @@ Heartbeat.prototype.getBatteryLevel = function(success, fail) {
 };
 
 Heartbeat.prototype.successCallback = function(payload) {
+  console.log('successCallBack received', JSON.stringify(payload));
   if (payload && payload.type) {
     this.emit(payload.type, payload.data);
+    console.log('Heartbeat.prototype.successCallback', payload);
+    cordova.fireWindowEvent('successevent', payload);
   }
 };
 
 Heartbeat.prototype.errorCallback = function(payload) {
+  console.log('errorCallback received', JSON.stringify(payload));
   if (payload && payload.type) {
     this.emit(payload.type, new Error(payload.message));
+    console.log('Heartbeat.prototype.errorCallback', payload);
+    cordova.fireWindowEvent('errorevent', payload);
   }
 };
 
