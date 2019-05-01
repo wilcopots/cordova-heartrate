@@ -167,7 +167,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
       public void run() {
         JSONObject result = new JSONObject();
         try {
-          result.put("type", type);
+          result.put("resulttype", type);
           result.put("data", data);
           PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
           pluginResult.setKeepCallback(true);
@@ -210,7 +210,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
         public void run() {
           JSONObject result = new JSONObject();
           try {
-            result.put("type", type);
+            result.put("resulttype", type);
             result.put("message", message);
             PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
             pluginResult.setKeepCallback(true);
