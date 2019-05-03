@@ -307,11 +307,15 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     sendErrorResult("error", error);
   }
 
-    @Override
+  @Override
     public void onWarning(Monitor.WARNING w) {
-        String status = "WARNING";
-        sendSuccessResult("status", status);
-    };
+      Log.e(TAG, "onWarning:" + String.valueOf(w));
+      String warning = "";
+      if (w == Monitor.WARNING.SHAKING) {
+        warning = "SHAKING";
+      }
+      sendSuccessResult("warning", warning);
+  };
 
 
   @Override
