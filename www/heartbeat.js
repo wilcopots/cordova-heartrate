@@ -98,20 +98,32 @@ Heartbeat.prototype.getBatteryLevel = function(success, fail) {
   exec(success, fail, 'Heartbeat', 'getBatteryLevel', []);
 };
 
+// Payload.resulttype is used and returned from Android (because the payload.type is reserved)
 Heartbeat.prototype.successCallback = function(payload) {
   console.log('successCallBack received', JSON.stringify(payload));
   if (payload && payload.resulttype) {
-    this.emit(payload.type, payload.data);
-    console.log('Heartbeat.prototype.successCallback', payload);
+    // this.emit(payload.type, payload.data);
+    console.log('Heartbeat.prototype.successCallback (payload.resulttype)', JSON.stringify(payload));
+    cordova.fireWindowEvent('successevent', payload);
+  } else if (payload && payload.type) {
+	// this.emit(payload.type, payload.data);
+	payload.resulttype = payload.type;
+    console.log('Heartbeat.prototype.successCallback (payload.type)', JSON.stringify(payload));
     cordova.fireWindowEvent('successevent', payload);
   }
 };
 
+// Payload.resulttype is used and returened from Android (because the payload.type is reserved)
 Heartbeat.prototype.errorCallback = function(payload) {
   console.log('errorCallback received', JSON.stringify(payload));
   if (payload && payload.resulttype) {
-    this.emit(payload.type, new Error(payload.message));
-    console.log('Heartbeat.prototype.errorCallback', payload);
+    // this.emit(payload.type, new Error(payload.message));
+    console.log('Heartbeat.prototype.errorCallback' (payload.resulttype), JSON.stringify(payload));
+    cordova.fireWindowEvent('errorevent', payload);
+  } else if (payload && payload.type) {
+	// this.emit(payload.type, new Error(payload.message));
+	payload.resulttype = payload.type;
+    console.log('Heartbeat.prototype.errorCallback (payload.type)', JSON.stringify(payload));
     cordova.fireWindowEvent('errorevent', payload);
   }
 };
