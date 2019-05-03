@@ -157,7 +157,7 @@
 }
 
 - (void)onStatusChange:(HeartBeatStatus)status {
-  NSLog(@"HeartbeatPlugin - onStatusChange: %@", (HeartBeatStatus)status);
+  NSLog(@"HeartbeatPlugin - onStatusChange");
   NSString *statusString = @"";
   switch (status) {
     case STARTED:
