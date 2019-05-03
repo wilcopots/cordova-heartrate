@@ -19,6 +19,7 @@
 @implementation HeartbeatPlugin
 
 - (void)pluginInitialize {
+  NSLog(@"HeartbeatPlugin - initialize");
   [self setResultQueue:[[NSMutableArray alloc] init]];
   [self setResultDictionary:[[NSMutableDictionary alloc] init]];
   [self setLib:[[HeartbeatLib alloc] init]];
@@ -31,6 +32,7 @@
 }
 
 - (void)start:(CDVInvokedUrlCommand*)command {
+  NSLog(@"HeartbeatPlugin - start");
   [[self commandDelegate] runInBackground:^{
     [[self lib] start];
     [self setMainCallbackId:[command callbackId]];
@@ -41,6 +43,7 @@
 }
 
 - (void)stop:(CDVInvokedUrlCommand*)command {
+  NSLog(@"HeartbeatPlugin - stop");
   [[self commandDelegate] runInBackground:^{
     [[self lib] stop];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -58,6 +61,7 @@
 
 // Not available yet for iOS, hence the empty response
 - (void)getBatteryLevel:(CDVInvokedUrlCommand*)command {
+  NSLog(@"HeartbeatPlugin - getBatteryLevel");
   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
   [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
@@ -65,6 +69,7 @@
 #pragma callback methods
 
 - (void)sendResultQueue {
+  NSLog(@"HeartbeatPlugin - sendResultQueue");
   [[self commandDelegate] runInBackground:^{
     if (_mainCallbackId != nil) {
       for (CDVPluginResult *pluginResult in _resultQueue) {
@@ -76,6 +81,7 @@
 }
 
 - (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
+  NSLog(@"HeartbeatPlugin - sendErrorResultWithType");
   [[self commandDelegate] runInBackground:^{
     if (message != nil) {
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
@@ -90,6 +96,7 @@
 }
 
 - (void)sendSuccessResult:(NSDictionary *)payload {
+  NSLog(@"HeartbeatPlugin - sendSuccessResult");
   NSString *newResult = [NSString stringWithFormat:@"%@", payload[@"data"]];
   NSString *currentResult = self.resultDictionary[payload[@"type"]];
   if ([currentResult isEqualToString:newResult]) {
@@ -110,6 +117,7 @@
 }
 
 - (void)sendSuccessResultWithType:(NSString *)type andDictionary:(NSDictionary *)data {
+  NSLog(@"HeartbeatPlugin - sendSuccessResultWithType dictionary");
   if (type != nil && data != nil) {
     NSDictionary *payload = @{@"type": type, @"data": data};
     [self sendSuccessResult:payload];
@@ -117,6 +125,7 @@
 }
 
 - (void)sendSuccessResultWithType:(NSString *)type andArray:(NSArray *)data {
+  NSLog(@"HeartbeatPlugin - sendSuccessResultWithType array");
   if (type != nil && data != nil) {
     NSDictionary *payload = @{@"type": type, @"data": data};
     [self sendSuccessResult:payload];
@@ -124,6 +133,7 @@
 }
 
 - (void)sendSuccessResultWithType:(NSString *)type andString:(NSString *)data {
+  NSLog(@"HeartbeatPlugin - sendSuccessResultWithType string");
   if (type != nil && data != nil) {
     NSDictionary *payload = @{@"type": type, @"data": data};
     [self sendSuccessResult:payload];
@@ -131,6 +141,7 @@
 }
 
 - (void)sendSuccessResultWithType:(NSString *)type andNumber:(NSNumber *)data {
+  NSLog(@"HeartbeatPlugin - sendSuccessResultWithType number");
   if (type != nil && data != nil) {
     NSDictionary *payload = @{@"type": type, @"data": data};
     [self sendSuccessResult:payload];
@@ -140,11 +151,13 @@
 #pragma HeartbeatLibDelegate
 
 - (void)onPercentageCompleted:(int)percentage {
+  NSLog(@"HeartbeatPlugin - onPercentageCompleted");
   [self sendSuccessResultWithType:@"progress" andNumber:[NSNumber numberWithInt:percentage]];
   [self sendResultQueue];
 }
 
 - (void)onStatusChange:(HeartBeatStatus)status {
+  NSLog(@"HeartbeatPlugin - onStatusChange: %@", (HeartBeatStatus)status);
   NSString *statusString = @"";
   switch (status) {
     case STARTED:
@@ -181,6 +194,7 @@
 }
 
 - (void)onWarning:(HeartBeatWarning)warning {
+  NSLog(@"HeartbeatPlugin - onWarning");
   NSString * warningString = @"";
   switch(warning) {
     case SHAKING:
@@ -201,11 +215,13 @@
 }
 
 - (void)onHeartBeat:(int)bpm {
+  NSLog(@"HeartbeatPlugin - onHeartBeat");
   [self sendSuccessResultWithType:@"bpm" andNumber:[NSNumber numberWithInt:bpm]];
   [self sendResultQueue];
 }
 
 - (void)onHeartBeatHR:(HR *)hr {
+  NSLog(@"HeartbeatPlugin - onHeartBeatHR");
   NSDictionary * result = @{
     @"timestamp": @(hr.timestamp),
     @"correlation":  [NSNumber numberWithInt:hr.correlation],
@@ -217,6 +233,7 @@
 }
 
 - (void)onError:(HeartBeatError)error {
+  NSLog(@"HeartbeatPlugin - onError");
   NSString * errorString = @"";
   switch (error) {
     case FINGER_ERROR:
@@ -240,11 +257,13 @@
 }
 
 - (void)onGraphArrayUpdated:(NSArray *)points {
+  NSLog(@"HeartbeatPlugin - onGraphArrayUpdated");
   [self sendSuccessResultWithType:@"graph" andArray:[NSArray arrayWithArray:points]];
   [self sendResultQueue];
 }
 
 - (void)onHRVReady:(HRV *)hrv {
+  NSLog(@"HeartbeatPlugin - onHRVReady");
   NSDictionary * result = @{
     @"sd": [NSNumber numberWithInt:hrv.sd],
     @"rmssd": [NSNumber numberWithInt:hrv.rMSSD],
