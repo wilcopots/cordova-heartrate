@@ -118,7 +118,7 @@ Heartbeat.prototype.errorCallback = function(payload) {
   console.log('errorCallback received', JSON.stringify(payload));
   if (payload && payload.resulttype) {
     // this.emit(payload.type, new Error(payload.message));
-    console.log('Heartbeat.prototype.errorCallback' (payload.resulttype), JSON.stringify(payload));
+    console.log('Heartbeat.prototype.errorCallback (payload.resulttype)', JSON.stringify(payload));
     cordova.fireWindowEvent('errorevent', payload);
   } else if (payload && payload.type) {
 	// this.emit(payload.type, new Error(payload.message));
