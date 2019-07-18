@@ -232,6 +232,12 @@
   [self sendResultQueue];
 }
 
+- (void)lowFrequencyPercentage:(double)LFper {
+	NSLog(@"HeartbeatPlugin - lowFrequencyPercentage");
+	[self sendSuccessResultWithType:@"lfpercentage" andNumber:[NSNumber numberWithDouble:LFper]];
+	[self sendResultQueue];
+}
+
 - (void)onError:(HeartBeatError)error {
   NSLog(@"HeartbeatPlugin - onError");
   NSString * errorString = @"";
@@ -270,7 +276,8 @@
     @"pnn50": [NSNumber numberWithInt:hrv.pNN50],
     @"avnn": [NSNumber numberWithInt:hrv.AVNN],
     @"confidenceLevel": [NSNumber numberWithInt:hrv.confidenceLevel],
-    @"bpm": [NSNumber numberWithInt:hrv.bpm]
+    @"bpm": [NSNumber numberWithInt:hrv.bpm],
+	@"lfpercentage": [NSNumber numberWithDouble:hrv.prcLf]
   };
   [self sendSuccessResultWithType:@"hrv" andDictionary:result];
   [self sendResultQueue];

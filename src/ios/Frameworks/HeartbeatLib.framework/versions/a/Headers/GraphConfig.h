@@ -2,8 +2,8 @@
 //  GraphConfig.h
 //  HeartbeatLib
 //
-//  Created by Leon Boon on 18/04/16.
-//  Copyright © 2019 Happitech. All rights reserved.
+//  Created by Yosef Safi Harb on 18/04/16.
+//  Copyright © 2016 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

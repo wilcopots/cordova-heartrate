@@ -6,7 +6,8 @@ repositories {
 }
 
 dependencies {
-  compile(name:'HeartBeatLibAndroid', ext:'aar')
+  compile(name:'heartbeatandroid-release', ext:'aar')
+  compile(name:'heartbeatlibrary-release', ext:'aar')
 }
 
 android {

@@ -250,6 +250,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
       result.put("rmssd", r.getrMSSD());
       result.put("pnn50", r.getpNN50());
       result.put("confidenceLevel", r.getConfidenceLevel());
+      result.put("lfpercentage", r.getLowFrequencyPercentage());
       // result.put("badBeats", r.getBadBeats());
       // result.put("totalBeats", r.getTotalBeats());
       sendSuccessResult("hrv", result);
@@ -277,6 +278,12 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     } catch (JSONException e) {
       Log.e(TAG, "could not serialize hr");
     }
+  }
+
+  @Override
+  public void onLowFrequencyPercentage(double percentage) {
+    Log.d(TAG, "onLowFrequencyPercentage:" + String.valueOf(percentage));
+    sendSuccessResult("lfpercentage", percentage);
   }
 
   @Override

@@ -2,45 +2,44 @@
 //  Functions.h
 //  HeartbeatLib
 //
-//  Created by Leon, Remi & Yosef on 29-07-18.
-//  Copyright (c) 2019 Happitech. All rights reserved.
+//  Created by Leon, Remi & Yosef on 29-07-15.
+//  Copyright (c) 2018 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
-
-#import "FPRange.h"
 #import "HSV.h"
 #import "RGB.h"
+#import "FPRange.h"
 #include <stdlib.h>
 
-@class Pulse;
 @class FFT;
-@class Value;
-@class LeastSquare;
+@class Pulse;
 
 @interface Functions : NSObject
+
+
 @property (nonatomic, readwrite) int i;
 @property (nonatomic, readwrite) int k;
 @property (nonatomic, readwrite) int change;
-@property (nonatomic, readwrite) double corrected;
 
 - (NSMutableArray <RGB *> *) splitBufferInPartsToRGB:(CMSampleBufferRef)buffer numOfParts:(int)parts;
+//- (HSV *) RGBtoHSV:(RGB *)rgb;
 - (NSArray<HSV *> *) RGBtoHSV:(NSArray<RGB *> *)rgbs;
+
 - (double) getAverage:(int)index forBeats:(NSArray *)list;
 - (double)calculateHRV:(double)currentPulse andNextPulse:(double)next;
-- (NSMutableArray *) newAfterFilter:(NSMutableArray *)input atStartIndex:(int)startIndex;
-- (NSMutableArray *) afterFilter:(NSMutableArray *)RR atStartIndex:(int)startIndex;
-- (NSMutableArray *) finalFilter:(NSArray *)input atStartIndex:(int)startIndex;
+- (double) getReverseAverage:(int)index forBeats:(NSArray *)list;
+- (int) afterFilter:(NSArray *)RR ;
+- (void) finalFilter:(NSArray *)RR;
+- (BOOL) getIrregularity:(NSMutableArray *)RR;
 - (void) resetAfterFilter;
-- (void) resetValues;
+- (double)meanRmssd:(NSMutableArray *)RR;
+- (double)rmssd:(NSMutableArray *)RR;
+- (double)moveCount:(NSMutableArray *)values;
 - (FPRange *)checkMovement:(NSMutableArray *)RR;
-- (int)moveCount:(NSMutableArray *)values;
 - (double)getBatteryPercentage;
 
-- (double)meanRmssd:(NSMutableArray *)RR;
-- (BOOL) getIrregularity:(NSMutableArray *)RR;
-
 - (FFT *)checkFFTForPulses:(NSArray <Pulse *> *)pulses;
-- (LeastSquare *)leastSquare:(NSMutableArray<Value *> *)values forTime:(double)time andAVNN:(double)avnn;
+
 @end

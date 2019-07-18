@@ -10,9 +10,9 @@
 
 @interface HR : NSObject
 
-@property (nonatomic, readwrite) int BPM;
 @property (nonatomic, readwrite) double timestamp;
+@property (nonatomic, readwrite) double RR;
 @property (nonatomic, readwrite) double correlation;
-@property (nonatomic, readwrite) double FFT;
+@property (nonatomic, readwrite) int BPM;
 
 @end

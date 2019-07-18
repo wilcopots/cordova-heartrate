@@ -2,8 +2,8 @@
 //  FPRange.h
 //  HeartbeatLib
 //
-//  Created by Leon Boon on 19-04-18.
-//  Copyright © 2019 Happitech. All rights reserved.
+//  Created by Yosef Safi Harb on 19/10/15.
+//  Copyright © 2018 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

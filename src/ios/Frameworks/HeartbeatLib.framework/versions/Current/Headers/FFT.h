@@ -2,8 +2,8 @@
 //  FFT.h
 //  HeartbeatLib
 //
-//  Created by Leon Boon on 05/10/16.
-//  Copyright © 2019  Happitech. All rights reserved..
+//  Created by Franklin Snellink on 10/01/17.
+//  Copyright © 2018 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

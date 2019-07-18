@@ -15,7 +15,8 @@
         <param name="android-package" value="nl.trimbos.eva.HeartbeatPlugin"/>
       </feature>
     </config-file>
-    <source-file src="src/android/libs/HeartBeatLibAndroid.aar" target-dir="libs" framework="true"/>
+    <source-file src="src/android/libs/heartbeatandroid-release.aar" target-dir="libs" framework="true"/>
+	<source-file src="src/android/libs/heartbeatlibrary-release.aar" target-dir="libs" framework="true"/>
     <source-file src="src/android/HeartbeatPlugin.java" target-dir="src/nl/trimbos/eva"/>
     <source-file src="src/android/build-extras.gradle" target-dir="."/>
     <config-file target="AndroidManifest.xml" parent="/manifest">
