@@ -2,8 +2,6 @@
 #import "HeartbeatLib/HRV.h"
 #import "HeartbeatLib/Graph.h"
 #import "HeartbeatLib/Pulse.h"
-#import "HeartbeatLib/Beat.h"
-#import "HeartbeatLib/Value.h"
 #import "HeartbeatLib/FFT.h"
 #import "HeartbeatPlugin.h"
 
@@ -56,6 +54,7 @@
 }
 
 - (void)setMeasureTime:(CDVInvokedUrlCommand*)command {
+  NSLog(@"HeartbeatPlugin - setMeasureTime");
   [[self lib] setMeasureTime:[[command argumentAtIndex:0] intValue]];
 }
 
@@ -251,8 +250,8 @@
     case BAD_FINGER_POSITION:
       errorString = @"BAD_FINGER_POSITION";
       break;
-    case TOO_MUCH_MOVEMENT:
-      errorString = @"TOO_MUCH_MOVEMENT";
+    case TO_MUCH_MOVEMENT:
+      errorString = @"TO_MUCH_MOVEMENT";
       break;
     default:
       errorString = @"";
