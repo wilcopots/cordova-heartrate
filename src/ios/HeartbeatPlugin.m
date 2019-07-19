@@ -56,6 +56,8 @@
 - (void)setMeasureTime:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - setMeasureTime");
   [[self lib] setMeasureTime:[[command argumentAtIndex:0] intValue]];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+  [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
 
 // Not available yet for iOS, hence the empty response
@@ -232,9 +234,9 @@
 }
 
 - (void)lowFrequencyPercentage:(double)LFper {
-	NSLog(@"HeartbeatPlugin - lowFrequencyPercentage");
-	[self sendSuccessResultWithType:@"lfpercentage" andNumber:[NSNumber numberWithDouble:LFper]];
-	[self sendResultQueue];
+    NSLog(@"HeartbeatPlugin - lowFrequencyPercentage");
+    [self sendSuccessResultWithType:@"lfpercentage" andNumber:[NSNumber numberWithDouble:LFper]];
+    [self sendResultQueue];
 }
 
 - (void)onError:(HeartBeatError)error {
@@ -276,7 +278,7 @@
     @"avnn": [NSNumber numberWithInt:hrv.AVNN],
     @"confidenceLevel": [NSNumber numberWithInt:hrv.confidenceLevel],
     @"bpm": [NSNumber numberWithInt:hrv.bpm],
-	@"lfpercentage": [NSNumber numberWithDouble:hrv.prcLf]
+    @"lfpercentage": [NSNumber numberWithDouble:hrv.prcLf]
   };
   [self sendSuccessResultWithType:@"hrv" andDictionary:result];
   [self sendResultQueue];
