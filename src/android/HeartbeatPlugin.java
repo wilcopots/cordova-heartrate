@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import happitech.nl.heartbeatandroid.Interface.HeartBeatListener;
 import happitech.nl.heartbeatandroid.Monitor;
 import happitech.nl.heartbeatandroid.models.ClassifiedResult;
-import happitech.nl.heartbeatandroid.models.HRV;
+import com.happitech.nl.heartbeatandroid.dj.HrvParams;
 import happitech.nl.heartbeatandroid.models.HR;
 import happitech.nl.heartbeatandroid.models.Pulse;
 
@@ -240,17 +240,18 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHRVReady(HRV r, ClassifiedResult cr) {
+  public void onHRVReady(HrvParams r) {
     Log.d(TAG, "onHRVReady:" + String.valueOf(r));
     JSONObject result = new JSONObject();
     try {
-      result.put("avnn", r.getAVNN());
-      result.put("bpm", r.getBPM());
-      result.put("sd", r.getSD());
-      result.put("rmssd", r.getrMSSD());
-      result.put("pnn50", r.getpNN50());
-      result.put("confidenceLevel", r.getConfidenceLevel());
-      result.put("lfpercentage", r.getLowFrequencyPercentage());
+      result.put("avnn", r.getAvnn());
+      // result.put("bpm", r.getBPM());
+      // result.put("sd", r.getSD());
+      result.put("rmssd", r.getRmssd());
+      result.put("pnn50", r.getPnn50());
+      // result.put("confidenceLevel", r.getConfidenceLevel());
+
+      result.put("lfpercentage", r.getPrcLF());
       // result.put("badBeats", r.getBadBeats());
       // result.put("totalBeats", r.getTotalBeats());
       sendSuccessResult("hrv", result);
