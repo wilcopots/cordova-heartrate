@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
 
+import android.content.pm.PackageManager;
+import android.Manifest;
 import android.util.Log;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -16,6 +18,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
 
 import org.json.JSONArray;
@@ -106,6 +109,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
    * @param callbackContext
    */
   protected void setMeasureTime(JSONArray args, final CallbackContext callbackContext) {
+    Log.i(TAG, "setMeasureTime");
     try {
       measureTime = args.getInt(0);
       monitor = new Monitor(cordova.getActivity(), this, measureTime);
@@ -117,7 +121,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
       });
 
     } catch (JSONException e) {
-      Log.e(TAG, "could not serialize result for callaback");
+      Log.e(TAG, "could not serialize result for callback");
       callbackContext.error("could not serialize result for callback");
     }
     Log.d(TAG, "Set measure time: " + measureTime);
@@ -161,6 +165,21 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     } catch (Exception e) {
       Log.e(TAG, e.getMessage());
     }
+  }
+
+  protected void checkPermissions(CallbackContext callbackContext) {
+    boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
+    Log.i(TAG, "start - takePicturePermission: " + takePicturePermission);
+
+    if (takePicturePermission) {
+      PluginResult result = new PluginResult(PluginResult.Status.OK, "camera geen toegang");
+      callbackContext.sendPluginResult(result);
+    } else {
+      PermissionHelper.requestPermission(this, 0, Manifest.permission.CAMERA);
+      PluginResult result = new PluginResult(PluginResult.Status.ERROR, "camera geen toegang");
+      callbackContext.sendPluginResult(result);
+    }
+
   }
 
   /**
