@@ -6,8 +6,9 @@ repositories {
 }
 
 dependencies {
-  compile(name:'heartbeatandroid-release', ext:'aar')
-  compile(name:'heartbeatlibrary-release', ext:'aar')
+  implementation(name:'heartbeatandroid-release', ext:'aar')
+  implementation(name:'heartbeatlibrary-release', ext:'aar')
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.31'
 }
 
 android {

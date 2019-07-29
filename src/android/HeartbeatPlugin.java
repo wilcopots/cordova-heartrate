@@ -75,7 +75,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   protected void start(CallbackContext callbackContext) {
     Log.i(TAG, "start");
     mainCallback = callbackContext;
-    PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT, "");
+    PluginResult result = new PluginResult(PluginResult.Status.OK, "");
     result.setKeepCallback(true);
     callbackContext.sendPluginResult(result);
     monitor.startMeasuring();
@@ -87,12 +87,16 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
    * Stop the plugin
    * @param callbackContext
    */
-  protected void stop(CallbackContext callbackContext) {
+  protected void stop(final CallbackContext callbackContext) {
     Log.i(TAG, "stop");
-    PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT, "");
-    callbackContext.sendPluginResult(result);
+    final PluginResult result = new PluginResult(PluginResult.Status.OK, "");
     monitor.stopMeasuring();
 
+    cordova.getThreadPool().execute(new Runnable() {
+      public void run() {
+        callbackContext.sendPluginResult(result); // Thread-safe.
+      }
+    });
     allowScreenToSleep();
   }
 
@@ -101,14 +105,20 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
    * @param args
    * @param callbackContext
    */
-  protected void setMeasureTime(JSONArray args, CallbackContext callbackContext) {
+  protected void setMeasureTime(JSONArray args, final CallbackContext callbackContext) {
     try {
       measureTime = args.getInt(0);
       monitor = new Monitor(cordova.getActivity(), this, measureTime);
-      PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT, "");
-      callbackContext.sendPluginResult(result);
+      final PluginResult result = new PluginResult(PluginResult.Status.OK, "");
+      cordova.getThreadPool().execute(new Runnable() {
+        public void run() {
+          callbackContext.sendPluginResult(result); // Thread-safe.
+        }
+      });
+
     } catch (JSONException e) {
-      Log.e(TAG, "could not serialize result for callback");
+      Log.e(TAG, "could not serialize result for callaback");
+      callbackContext.error("could not serialize result for callback");
     }
     Log.d(TAG, "Set measure time: " + measureTime);
   }
@@ -122,6 +132,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     float batteryLevel = monitor.getBatteryLevel();
     Log.d(TAG, "batteryLevel:" + String.valueOf(batteryLevel));
     sendSuccessResult("batteryLevel", batteryLevel);
+    callbackContext.success(Float.toString(batteryLevel));
   }
 
   private void keepScreenAwake() {
