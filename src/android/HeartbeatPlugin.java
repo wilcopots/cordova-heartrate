@@ -14,6 +14,8 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -25,12 +27,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import happitech.nl.heartbeatandroid.Interface.HeartBeatListener;
+import happitech.nl.heartbeatandroid.HR;
+import happitech.nl.heartbeatandroid.HRV;
+import happitech.nl.heartbeatandroid.HeartBeatListener;
 import happitech.nl.heartbeatandroid.Monitor;
-import happitech.nl.heartbeatandroid.models.ClassifiedResult;
-import com.happitech.nl.heartbeatandroid.dj.HrvParams;
-import happitech.nl.heartbeatandroid.models.HR;
-import happitech.nl.heartbeatandroid.models.Pulse;
 
 public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener {
 
@@ -67,7 +67,14 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     } else if (action.equals("getBatteryLevel")) {
       getBatteryLevel(callbackContext);
       return true;
+    } else if (action.equals("checkPermissions")) {
+      checkPermissions(callbackContext);
+      return true;
+    } else if(action.equals("export")) {
+      export(args, callbackContext);
+      return true;
     }
+
     return false;
   }
 
@@ -182,6 +189,53 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
 
   }
 
+  private void export(final JSONArray args, final CallbackContext callbackContext)
+  {
+    Log.i(TAG, "export");
+    try {
+
+      // Determine the export type
+
+      String exportTypeString = args.getString(0);
+      String exportData;
+      Log.i(TAG, "export type arg: " + exportTypeString);
+      switch (exportTypeString)
+      {
+        case "raw":
+          exportData = monitor.exportRaw();
+          break;
+
+        case "rr":
+          exportData = monitor.exportRR();
+          break;
+
+        case "results":
+          exportData = monitor.exportResults();
+          break;
+
+        default:
+          String error = "Unknown export type: " + exportTypeString + ". Possible types are: 'raw', 'rr', 'results'.";
+          Log.e(TAG, "export " + error);
+          callbackContext.error(error);
+
+          return;
+      }
+
+      Log.d(TAG, "export exportData size chars: " + exportData.length());
+
+      // TODO check if export data was put into result correctly
+
+      final PluginResult result = new PluginResult(PluginResult.Status.OK, exportData);
+      cordova.getThreadPool().execute((Runnable) () ->
+      {
+        callbackContext.sendPluginResult(result); // Thread-safe.
+      });
+    } catch (JSONException e) {
+      Log.e(TAG, "could not serialize result for callback");
+      callbackContext.error("could not serialize result for callback");
+    }
+  }
+
   /**
    * Send a success result to the webview
    * @param type
@@ -270,15 +324,15 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHRVReady(HrvParams r) {
+  public void onHRVReady(@NonNull HRV r) {
     Log.d(TAG, "onHRVReady:" + String.valueOf(r));
     JSONObject result = new JSONObject();
     try {
-      result.put("avnn", r.getAvnn());
+      result.put("avnn", r.getAVNN());
       // result.put("bpm", r.getBPM());
       // result.put("sd", r.getSD());
-      result.put("rmssd", r.getRmssd());
-      result.put("pnn50", r.getPnn50());
+      result.put("rmssd", r.getRMSSD());
+      result.put("pnn50", r.getPNN50());
       // result.put("confidenceLevel", r.getConfidenceLevel());
 
       result.put("lfpercentage", r.getPrcLF());
@@ -297,12 +351,12 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHeartBeat(HR hr) {
+  public void onHeartBeat(@NonNull HR hr) {
     Log.d(TAG, "onHeartBeatHr:" + String.valueOf(hr));
     JSONObject result = new JSONObject();
     try {
       result.put("timestamp", hr.getTimestamp());
-      result.put("bpm", hr.getBPM());
+      result.put("bpm", hr.getBpm());
       // result.put("corrolation", hr.getCorrolation());
       // result.put("confidenceLevel", hr.getConfidenceLevel());
       sendSuccessResult("hr", result);
