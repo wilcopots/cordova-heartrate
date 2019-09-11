@@ -3,7 +3,7 @@
 //  HeartbeatLib
 //
 //  Created by Leon, Remi & Yosef on 30-07-15.
-//  Copyright (c) 2018 Happitech. All rights reserved.
+//  Copyright (c) 2019 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

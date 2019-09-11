@@ -2,7 +2,7 @@
 //  HeartbeatLib.h
 //  HeartbeatLib
 //  Created by Leon, Remi & Yosef on 21/07/15.
-//  Copyright (c) 2018 Happitech. All rights reserved.
+//  Copyright (c) 2019 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -28,6 +28,8 @@
 - (void)shareViaMail:(NSURL *)path;
 
 @end
+
+@class Camera;
 
 @interface HeartbeatLib : NSObject<CameraDelegate>
 

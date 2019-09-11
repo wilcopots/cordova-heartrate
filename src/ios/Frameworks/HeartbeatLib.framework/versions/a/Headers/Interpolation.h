@@ -3,7 +3,7 @@
 //  Heartbeat
 //
 //  Created by Leon, Remi & Yosef on 29-07-15.
-//  Copyright (c) 2018 Happitech. All rights reserved.
+//  Copyright (c) 2019 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -65,6 +65,8 @@ typedef NS_ENUM(NSInteger, ClassifiedValue) {
 @property (nonatomic, retain) NSMutableArray * baseLine;
 @property (nonatomic, readwrite) float hrv;
 @property (nonatomic, readwrite) int bpm;
+@property (nonatomic, readwrite) int prevbpm;
+
 @property (nonatomic, readwrite) double prcLf;
 
 @property (nonatomic, retain) NSString * writeString3;
@@ -79,6 +81,10 @@ typedef NS_ENUM(NSInteger, ClassifiedValue) {
 @property (strong, nonatomic) NSMutableArray *subclasses;
 
 - (NSMutableArray *)timeWindowFeatures:(NSMutableArray *)input;
+//- (NSString *)writeCSVWithParam:(NSString *)param;
+- (NSString *)writeCSV_all;
+- (NSString *)writeCSV_final;
+- (NSString *)writeCSV_export;
 
 - (double)getAverageHRV;
 - (void)getClassification;
@@ -105,9 +111,5 @@ typedef NS_ENUM(NSInteger, ClassifiedValue) {
 - (double)gethrv_pNN50;
 - (double)gethrv_confidenceLevel;
 - (double)gethrv_prcLf;
-
-- (void)writeCSV_all;
-- (void)writeCSV_final;
-- (void)writeCSV_export;
 
 @end

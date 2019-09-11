@@ -3,7 +3,7 @@
 //  HeartbeatLib
 //
 //  Created by Leon, Remi & Yosef on 29-07-15.
-//  Copyright (c) 2018 Happitech. All rights reserved.
+//  Copyright (c) 2019 Happitech. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger, HeartBeatWarning) {
 
 @class ClassifiedResult;
 
-@interface Camera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface Camera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> 
 
 @property (nonatomic, retain) Interpolation * interpolation;
 @property (nonatomic, retain) id<CameraDelegate> delegate;
@@ -67,6 +67,10 @@ typedef NS_ENUM(NSInteger, HeartBeatWarning) {
 @property (nonatomic, retain) NSMutableArray <Value *> * values;
 
 @property (nonatomic, assign) NSInteger patientNumber;
+
+@property (nonatomic, strong) NSString *exportRaw;
+@property (nonatomic, strong) NSString *exportRR;
+@property (nonatomic, strong) NSString *exportResults;
 
 - (void)startMeasuring;
 - (void)stopMeasure;

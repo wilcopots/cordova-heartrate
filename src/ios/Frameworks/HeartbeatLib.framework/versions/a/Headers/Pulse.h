@@ -3,7 +3,7 @@
 //  Heartbeat
 //
 //  Created by Leon, Remi & Yosef on 14-07-15.
-//  Copyright (c) 2018 Happitech. All rights reserved.
+//  Copyright (c) 2019 Happitech. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
