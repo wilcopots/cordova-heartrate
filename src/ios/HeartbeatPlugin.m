@@ -31,22 +31,23 @@
 
 - (void)start:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - start");
-  [[self commandDelegate] runInBackground:^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     [[self lib] start];
     [self setMainCallbackId:[command callbackId]];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-  }];
+  });
+
 }
 
 - (void)stop:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - stop");
-  [[self commandDelegate] runInBackground:^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     [[self lib] stop];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-  }];
+  });
 }
 
 - (void)setPointsForGraph:(CDVInvokedUrlCommand*)command {
@@ -71,19 +72,19 @@
 
 - (void)sendResultQueue {
   NSLog(@"HeartbeatPlugin - sendResultQueue");
-  [[self commandDelegate] runInBackground:^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     if (_mainCallbackId != nil) {
       for (CDVPluginResult *pluginResult in _resultQueue) {
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
       }
       [_resultQueue removeAllObjects];
     }
-  }];
+  });
 }
 
 - (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
   NSLog(@"HeartbeatPlugin - sendErrorResultWithType");
-  [[self commandDelegate] runInBackground:^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     if (message != nil) {
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
       [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -93,7 +94,7 @@
         [_resultQueue addObject:pluginResult];
       }
     }
-  }];
+  });
 }
 
 - (void)sendSuccessResult:(NSDictionary *)payload {
@@ -103,7 +104,7 @@
   if ([currentResult isEqualToString:newResult]) {
     return;
   }
-  [[self commandDelegate] runInBackground:^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     if (payload != nil) {
       CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:payload];
       [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -114,7 +115,7 @@
       }
       self.resultDictionary[payload[@"type"]] = newResult;
     }
-  }];
+  });
 }
 
 - (void)sendSuccessResultWithType:(NSString *)type andDictionary:(NSDictionary *)data {
