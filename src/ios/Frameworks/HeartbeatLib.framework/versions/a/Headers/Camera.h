@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger, HeartBeatWarning) {
 
 @class ClassifiedResult;
 
-@interface Camera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate> 
+@interface Camera : NSObject<AVCaptureVideoDataOutputSampleBufferDelegate>
 
 @property (nonatomic, retain) Interpolation * interpolation;
 @property (nonatomic, retain) id<CameraDelegate> delegate;

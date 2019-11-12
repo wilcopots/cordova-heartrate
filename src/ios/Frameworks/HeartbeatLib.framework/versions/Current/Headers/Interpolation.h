@@ -38,6 +38,10 @@ typedef NS_ENUM(NSInteger, ClassifiedValue) {
 
 @class ClassifiedResult;
 
+@protocol InterpolationDelegate <NSObject>
+- (void)setExposureTargetBias:(CGFloat)value;
+@end
+
 @interface Interpolation : NSObject
 
 @property (nonatomic, readwrite) int sampleBPM;
@@ -54,7 +58,7 @@ typedef NS_ENUM(NSInteger, ClassifiedValue) {
 @property (nonatomic, readwrite) double finalprcLf;
 
 
-
+@property (weak, nonatomic) id<InterpolationDelegate> delegate;
 
 @property (nonatomic, retain) Filters * filter;
 @property (nonatomic, retain) Functions * functions;

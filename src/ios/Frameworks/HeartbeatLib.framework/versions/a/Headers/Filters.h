@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "SAMCubicSpline.h"
 
-@class Matrix;
+//@class Matrix;
 @class FilterResponse;
 
 #define NZEROS 8
@@ -18,7 +18,7 @@
 @interface Filters : NSObject {
     double xv[NZEROS+1], yv[NPOLES+1];
     
-    Matrix *A0, *B0, *A01, *B01, *Am, *Bm, *Cm, *M_1, *Am1, *Bm1, *Cm1, *M_11, *y1, *y11;
+    //Matrix *A0, *B0, *A01, *B01, *Am, *Bm, *Cm, *M_1, *Am1, *Bm1, *Cm1, *M_11, *y1, *y11;
 }
 
 //- (double)processValue:(double)value;

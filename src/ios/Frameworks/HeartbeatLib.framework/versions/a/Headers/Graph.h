@@ -11,7 +11,7 @@
 
 @interface Graph : UIView
 
-@property (nonatomic, readwrite) GraphConfig * config;
+@property (nonatomic, readwrite) GraphConfig *config;
 
 - (void)pointsUpdated:(NSArray *)array;
 

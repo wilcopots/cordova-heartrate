@@ -40,6 +40,6 @@
 - (FPRange *)checkMovement:(NSMutableArray *)RR;
 - (double)getBatteryPercentage;
 
-- (FFT *)checkFFTForPulses:(NSArray <Pulse *> *)pulses;
+//- (FFT *)checkFFTForPulses:(NSArray <Pulse *> *)pulses;
 
 @end

@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-@interface GraphConfig : NSObject
 
+@interface GraphConfig : NSObject
 
 @property (nonatomic, readwrite) CGRect frame;
 @property (nonatomic, readwrite) UIColor * backgroundColor;
