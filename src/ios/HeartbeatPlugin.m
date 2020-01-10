@@ -1,17 +1,13 @@
-#import <HeartbeatLib/HeartbeatLib.h>
-#import "HeartbeatLib/HRV.h"
-#import "HeartbeatLib/Graph.h"
-#import "HeartbeatLib/Pulse.h"
-#import "HeartbeatLib/FFT.h"
 #import "HeartbeatPlugin.h"
+#import <HeartMonitor/HRTHeartMonitor.h>
 
-@interface HeartbeatPlugin()<HeartBeatDelegate>
+@interface HeartbeatPlugin()<HRTHeartMonitorDelegate>
 
 @property (copy, nonatomic) NSString *mainCallbackId;
 @property (strong, nonatomic) NSMutableArray *resultQueue;
 @property (strong, nonatomic) NSMutableDictionary *resultDictionary;
-@property (strong, nonatomic) HeartbeatLib *lib;
-@property (nonatomic, assign) HeartBeatStatus currentStatus;
+@property (strong, nonatomic) HRTHeartMonitor *heartMonitor;
+@property (nonatomic, assign) HRTStatus currentStatus;
 @end
 
 @implementation HeartbeatPlugin
@@ -20,19 +16,17 @@
   NSLog(@"HeartbeatPlugin - initialize");
   [self setResultQueue:[[NSMutableArray alloc] init]];
   [self setResultDictionary:[[NSMutableDictionary alloc] init]];
-  [self setLib:[[HeartbeatLib alloc] init]];
-  [[self lib] setDelegate:self];
-  // Only show last 500 points for now to draw graph
-  // Might be something to make configurable in future
-  [[self lib] setPointsForGraph:500];
+  [self setHeartMonitor:[[HRTHeartMonitor alloc] init]];
+  [[self heartMonitor] setDelegate:self];
   // Since we're not using the HRV yet we can decrease the measure time
-  [[self lib] setMeasureTime:30];
+  [[self heartMonitor] setMeasurementTimeSeconds:30];
+
 }
 
 - (void)start:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - start");
   dispatch_async(dispatch_get_main_queue(), ^{
-    [[self lib] start];
+    [[self heartMonitor] startMeasuring];
     [self setMainCallbackId:[command callbackId]];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -44,26 +38,15 @@
 - (void)stop:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - stop");
   dispatch_async(dispatch_get_main_queue(), ^{
-    [[self lib] stop];
+    [[self heartMonitor] stopMeasuring];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
   });
 }
 
-- (void)setPointsForGraph:(CDVInvokedUrlCommand*)command {
-  [[self lib] setPointsForGraph:[[command argumentAtIndex:0] intValue]];
-}
-
 - (void)setMeasureTime:(CDVInvokedUrlCommand*)command {
   NSLog(@"HeartbeatPlugin - setMeasureTime");
-  [[self lib] setMeasureTime:[[command argumentAtIndex:0] intValue]];
-  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-  [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
-}
-
-// Not available yet for iOS, hence the empty response
-- (void)getBatteryLevel:(CDVInvokedUrlCommand*)command {
-  NSLog(@"HeartbeatPlugin - getBatteryLevel");
+  [[self heartMonitor] setMeasurementTimeSeconds:[[command argumentAtIndex:0] intValue]];
   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
   [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
@@ -152,39 +135,42 @@
 
 #pragma HeartbeatLibDelegate
 
-- (void)onPercentageCompleted:(int)percentage {
-  NSLog(@"HeartbeatPlugin - onPercentageCompleted");
-  [self sendSuccessResultWithType:@"progress" andNumber:[NSNumber numberWithInt:percentage]];
+- (void)onProgressUpdated:(int)percentCompleted timeProgressed:(int)timeProgressed timeRemaining:(int)timeRemaining {
+  NSLog(@"HeartbeatPlugin - onProgressUpdated");
+  NSDictionary * result = @{
+    @"percentageCompleted": [NSNumber numberWithInt:percentCompleted],
+    @"timeProgressed":  [NSNumber numberWithInt:timeProgressed],
+    @"timeRemaining": [NSNumber numberWithInt:timeRemaining]
+  };
+
+  [self sendSuccessResultWithType:@"progress" andDictionary:result];
   [self sendResultQueue];
 }
 
-- (void)onStatusChange:(HeartBeatStatus)status {
+- (void)onStatusChanged:(HRTStatus)status {
   NSLog(@"HeartbeatPlugin - onStatusChange");
   NSString *statusString = @"";
   switch (status) {
-    case STARTED:
+    case HRTStatusStarted:
       statusString = @"STARTED";
       break;
-    case NO_FINGER:
+    case HRTStatusNoFinger:
       statusString = @"NO_FINGER";
       break;
-    case FINGER_DETECTED:
+    case HRTStatusFingerDetected:
       statusString = @"FINGER_DETECTED";
       break;
-    case FINGER_PLACEMENT:
+    case HRTStatusBadFingerPosition:
       statusString = @"FINGER_PLACEMENT";
       break;
-    case CALIBRATING:
+    case HRTStatusCalibrating:
       statusString = @"CALIBRATING";
       break;
-    case MEASURING:
+    case HRTStatusMeasuring:
       statusString = @"MEASURING";
       break;
-    case COMPLETED:
+    case HRTStatusCompleted:
       statusString = @"COMPLETED";
-      break;
-    case INACCURATE_MEASUREMENT:
-      statusString = @"INACCURATE_MEASUREMENT";
       break;
     default:
       statusString = @"ERROR";
@@ -195,18 +181,15 @@
   [self sendResultQueue];
 }
 
-- (void)onWarning:(HeartBeatWarning)warning {
+- (void)onWarning:(HRTWarning)warning {
   NSLog(@"HeartbeatPlugin - onWarning");
   NSString * warningString = @"";
   switch(warning) {
-    case SHAKING:
+    case HRTWarningMovementDetected:
       warningString = @"SHAKING";
     break;
-    case LOW_QUALITY:
+    case HRTWarningLowQuality:
       warningString = @"LOW_QUALITY";
-    break;
-    case LOW_BATTERY:
-      warningString = @"LOW_BATTERY";
     break;
     default:
       warningString = @"";
@@ -216,45 +199,43 @@
   [self sendResultQueue];
 }
 
-- (void)onHeartBeat:(int)bpm {
+- (void)onHeartrateUpdated:(HRTHeartRate *)heartRate {
   NSLog(@"HeartbeatPlugin - onHeartBeat");
-  [self sendSuccessResultWithType:@"bpm" andNumber:[NSNumber numberWithInt:bpm]];
+  [self sendSuccessResultWithType:@"bpm" andNumber:[NSNumber numberWithInt:heartRate.BPM]];
   [self sendResultQueue];
 }
 
-- (void)onHeartBeatHR:(HR *)hr {
-  NSLog(@"HeartbeatPlugin - onHeartBeatHR");
-  NSDictionary * result = @{
-    @"timestamp": @(hr.timestamp),
-    @"correlation":  [NSNumber numberWithInt:hr.correlation],
-    // @"fft": @(hr.FFT),
-    @"bpm": [NSNumber numberWithInt:hr.BPM]
-  };
-  [self sendSuccessResultWithType:@"hr" andDictionary:result];
-  [self sendResultQueue];
-}
-
-- (void)lowFrequencyPercentage:(double)LFper {
-    NSLog(@"HeartbeatPlugin - lowFrequencyPercentage");
-    [self sendSuccessResultWithType:@"lfpercentage" andNumber:[NSNumber numberWithDouble:LFper]];
+- (void)onFrequencyHRVUpdated:(HRTFrequencyHRV *)frequencyHRV {
+    NSLog(@"HeartbeatPlugin - onFrequencyHRVUpdated");
+    NSDictionary * result = @{
+      @"lfPercentage": [NSNumber numberWithInt:frequencyHRV.lowFrequencyPercentage],
+      @"confidenceLevel": [NSNumber numberWithInt:frequencyHRV.confidenceLevel]
+    };
+    [self sendSuccessResultWithType:@"lfpercentage" andDictionary:result];
     [self sendResultQueue];
 }
 
-- (void)onError:(HeartBeatError)error {
+- (void)onError:(HRTError)error {
   NSLog(@"HeartbeatPlugin - onError");
   NSString * errorString = @"";
   switch (error) {
-    case FINGER_ERROR:
-      errorString = @"FINGER_ERROR";
+    case HRTErrorNoFingerDetected:
+      errorString = @"NO_FINGER_DETECTED";
       break;
-    case CAMERA_HAS_NO_PERMISSION:
+    case HRTErrorCameraHasNoPermission:
       errorString = @"CAMERA_HAS_NO_PERMISSION";
       break;
-    case BAD_FINGER_POSITION:
-      errorString = @"BAD_FINGER_POSITION";
+    case HRTErrorLowBattery:
+      errorString = @"LOW_BATTERY";
       break;
-    case TO_MUCH_MOVEMENT:
-      errorString = @"TO_MUCH_MOVEMENT";
+    case HRTErrorInvalidLicense:
+      errorString = @"BAD_PACKAGE_NAME";
+      break;
+    case HRTErrorTooMuchMovement:
+      errorString = @"TOO_MUCH_MOVEMENT";
+      break;
+    case HRTErrorBadQuality:
+      errorString = @"BAD_QUALITY";
       break;
     default:
       errorString = @"";
@@ -264,25 +245,24 @@
   [self sendResultQueue];
 }
 
-- (void)onGraphArrayUpdated:(NSArray *)points {
-  NSLog(@"HeartbeatPlugin - onGraphArrayUpdated");
-  [self sendSuccessResultWithType:@"graph" andArray:[NSArray arrayWithArray:points]];
-  [self sendResultQueue];
-}
-
-- (void)onHRVReady:(HRV *)hrv {
+- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV {
   NSLog(@"HeartbeatPlugin - onHRVReady");
   NSDictionary * result = @{
-    @"sd": [NSNumber numberWithInt:hrv.sd],
-    @"rmssd": [NSNumber numberWithInt:hrv.rMSSD],
-    @"pnn50": [NSNumber numberWithInt:hrv.pNN50],
-    @"avnn": [NSNumber numberWithInt:hrv.AVNN],
-    @"confidenceLevel": [NSNumber numberWithInt:hrv.confidenceLevel],
-    @"bpm": [NSNumber numberWithInt:hrv.bpm],
-    @"lfpercentage": [NSNumber numberWithDouble:hrv.prcLf]
+    @"sd": [NSNumber numberWithInt:timeHRV.SDNN],
+    @"rmssd": [NSNumber numberWithInt:timeHRV.RMSSD],
+    @"pnn50": [NSNumber numberWithInt:timeHRV.PNN50],
+    @"avnn": [NSNumber numberWithInt:timeHRV.AVNN],
+    @"confidenceLevel": [NSNumber numberWithInt:timeHRV.confidenceLevel],
+    @"bpm": [NSNumber numberWithInt:heartRate.BPM],
+    @"lfpercentage": [NSNumber numberWithDouble:frequencyHRV.lowFrequencyPercentage]
   };
   [self sendSuccessResultWithType:@"hrv" andDictionary:result];
   [self sendResultQueue];
 }
+
+- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV classificatonResults:(NSMutableArray *)results {
+    NSLog(@"HeartbeatPlugin - onMeasurementCompleted classificatonResults");
+}
+
 
 @end
