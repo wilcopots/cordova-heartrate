@@ -133,7 +133,7 @@
   }
 }
 
-#pragma HeartbeatLibDelegate
+#pragma HRTHeartMonitorDelegate
 
 - (void)onProgressUpdated:(int)percentCompleted timeProgressed:(int)timeProgressed timeRemaining:(int)timeRemaining {
   NSLog(@"HeartbeatPlugin - onProgressUpdated");
