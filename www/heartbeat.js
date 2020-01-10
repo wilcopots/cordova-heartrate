@@ -86,16 +86,8 @@ Heartbeat.prototype.stop = function(success, fail){
   exec(success, fail, 'Heartbeat', 'stop', []);
 };
 
-Heartbeat.prototype.setPointsForGraph = function(points, success, fail) {
-  exec(success, fail, 'Heartbeat', 'setPointsForGraph', [points]);
-};
-
 Heartbeat.prototype.setMeasureTime = function(measureTime, success, fail) {
   exec(success, fail, 'Heartbeat', 'setMeasureTime', [measureTime]);
-};
-
-Heartbeat.prototype.getBatteryLevel = function(success, fail) {
-  exec(success, fail, 'Heartbeat', 'getBatteryLevel', []);
 };
 
 Heartbeat.prototype.checkPermissions = function(success, fail) {

@@ -27,15 +27,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import happitech.nl.heartbeatandroid.HR;
-import happitech.nl.heartbeatandroid.HRV;
-import happitech.nl.heartbeatandroid.HeartBeatListener;
-import happitech.nl.heartbeatandroid.Monitor;
+import com.happitech.heartbeatandroid.Error;
+import com.happitech.heartbeatandroid.ExportType;
+import com.happitech.heartbeatandroid.FrequencyHRV;
+import com.happitech.heartbeatandroid.GraphSettings;
+import com.happitech.heartbeatandroid.HeartListener;
+import com.happitech.heartbeatandroid.HeartMonitor;
+import com.happitech.heartbeatandroid.HeartRate;
+import com.happitech.heartbeatandroid.Status;
+import com.happitech.heartbeatandroid.TimeHRV;
+import com.happitech.heartbeatandroid.Warning;
 
-public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener {
+import org.jetbrains.annotations.NotNull;
+
+public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
 
   private static final String TAG = "HeartbeatPlugin";
-  private Monitor monitor;
+  private HeartMonitor monitor;
   private CallbackContext mainCallback;
   private List<PluginResult> resultQueue;
   private int measureTime = 60;
@@ -49,7 +57,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     Log.i(TAG, "initialize HeartbeatPlugin");
     super.initialize(cordova, webView);
     resultQueue = new ArrayList<PluginResult>();
-    monitor = new Monitor(cordova.getActivity(), this, measureTime);
+    monitor = new HeartMonitor(cordova.getActivity(), this, measureTime);
     sendResultQueue();
   }
 
@@ -64,14 +72,8 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     } else if (action.equals("setMeasureTime")) {
       setMeasureTime(args, callbackContext);
       return true;
-    } else if (action.equals("getBatteryLevel")) {
-      getBatteryLevel(callbackContext);
-      return true;
     } else if (action.equals("checkPermissions")) {
       checkPermissions(callbackContext);
-      return true;
-    } else if(action.equals("export")) {
-      export(args, callbackContext);
       return true;
     }
 
@@ -119,7 +121,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     Log.i(TAG, "setMeasureTime");
     try {
       measureTime = args.getInt(0);
-      monitor = new Monitor(cordova.getActivity(), this, measureTime);
+      monitor = new HeartMonitor(cordova.getActivity(), this, measureTime);
       final PluginResult result = new PluginResult(PluginResult.Status.OK, "");
       cordova.getThreadPool().execute(new Runnable() {
         public void run() {
@@ -132,18 +134,6 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
       callbackContext.error("could not serialize result for callback");
     }
     Log.d(TAG, "Set measure time: " + measureTime);
-  }
-
-  /**
-   * Gets the battery level
-   * @param args
-   * @param callbackContext
-   */
-  protected void getBatteryLevel(CallbackContext callbackContext) {
-    float batteryLevel = monitor.getBatteryLevel();
-    Log.d(TAG, "batteryLevel:" + String.valueOf(batteryLevel));
-    sendSuccessResult("batteryLevel", batteryLevel);
-    callbackContext.success(Float.toString(batteryLevel));
   }
 
   private void keepScreenAwake() {
@@ -189,53 +179,6 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
 
   }
 
-  private void export(final JSONArray args, final CallbackContext callbackContext)
-  {
-    Log.i(TAG, "export");
-    try {
-
-      // Determine the export type
-
-      String exportTypeString = args.getString(0);
-      String exportData;
-      Log.i(TAG, "export type arg: " + exportTypeString);
-      switch (exportTypeString)
-      {
-        case "raw":
-          exportData = monitor.exportRaw();
-          break;
-
-        case "rr":
-          exportData = monitor.exportRR();
-          break;
-
-        case "results":
-          exportData = monitor.exportResults();
-          break;
-
-        default:
-          String error = "Unknown export type: " + exportTypeString + ". Possible types are: 'raw', 'rr', 'results'.";
-          Log.e(TAG, "export " + error);
-          callbackContext.error(error);
-
-          return;
-      }
-
-      Log.d(TAG, "export exportData size chars: " + exportData.length());
-
-      // TODO check if export data was put into result correctly
-
-      final PluginResult result = new PluginResult(PluginResult.Status.OK, exportData);
-      cordova.getThreadPool().execute((Runnable) () ->
-      {
-        callbackContext.sendPluginResult(result); // Thread-safe.
-      });
-    } catch (JSONException e) {
-      Log.e(TAG, "could not serialize result for callback");
-      callbackContext.error("could not serialize result for callback");
-    }
-  }
-
   /**
    * Send a success result to the webview
    * @param type
@@ -268,20 +211,6 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
       }
     });
   }
-
-  // private void sendDelayedSuccessResult(final String type, final Object data) {
-  //   if (isSendingResult) {
-  //     return;
-  //   }
-  //   isSendingResult = true;
-  //   resultHandler.postDelayed(new Runnable() {
-  //     @Override
-  //     public void run() {
-  //       sendSuccessResult(type, data);
-  //       isSendingResult = false;
-  //     }
-  //   }, 1000);
-  // }
 
   /**
    * Send an error to the webview
@@ -324,20 +253,18 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHRVReady(@NonNull HRV r) {
-    Log.d(TAG, "onHRVReady:" + String.valueOf(r));
+  public void onMeasurementCompleted(@NotNull HeartRate heartRate, @NotNull TimeHRV timeHRV, @NotNull FrequencyHRV frequencyHRV) {
+    Log.d(TAG, "onHRVReady:" + String.valueOf(heartRate));
     JSONObject result = new JSONObject();
     try {
-      result.put("avnn", r.getAVNN());
-      // result.put("bpm", r.getBPM());
-      // result.put("sd", r.getSD());
-      result.put("rmssd", r.getRMSSD());
-      result.put("pnn50", r.getPNN50());
-      // result.put("confidenceLevel", r.getConfidenceLevel());
+      result.put("avnn", timeHRV.getAVNN());
+      result.put("bpm", heartRate.getBPM());
+      result.put("sd", timeHRV.getSDNN());
+      result.put("rmssd", timeHRV.getRMSSD());
+      result.put("pnn50", timeHRV.getPNN50());
+      result.put("confidenceLevel", heartRate.getConfidenceLevel());
+      result.put("lfpercentage", frequencyHRV.getLowFrequencyPercentage());
 
-      result.put("lfpercentage", r.getPrcLF());
-      // result.put("badBeats", r.getBadBeats());
-      // result.put("totalBeats", r.getTotalBeats());
       sendSuccessResult("hrv", result);
     } catch (JSONException e) {
       Log.e(TAG, "could not serialize HRV");
@@ -345,95 +272,75 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onHeartBeat(int b) {
-    Log.d(TAG, "onHeartBeat:" + String.valueOf(b));
-    sendSuccessResult("bpm", b);
+  public void onHeartrateUpdated(HeartRate heartRate) {
+    Log.d(TAG, "onHeartBeat:" + heartRate.getBPM());
+    sendSuccessResult("bpm", (int) Math.round(heartRate.getBPM()));
   }
 
   @Override
-  public void onHeartBeat(@NonNull HR hr) {
-    Log.d(TAG, "onHeartBeatHr:" + String.valueOf(hr));
-    JSONObject result = new JSONObject();
-    try {
-      result.put("timestamp", hr.getTimestamp());
-      result.put("bpm", hr.getBpm());
-      // result.put("corrolation", hr.getCorrolation());
-      // result.put("confidenceLevel", hr.getConfidenceLevel());
-      sendSuccessResult("hr", result);
-    } catch (JSONException e) {
-      Log.e(TAG, "could not serialize hr");
-    }
-  }
-
-  @Override
-  public void onLowFrequencyPercentage(double percentage) {
-    Log.d(TAG, "onLowFrequencyPercentage:" + String.valueOf(percentage));
-    sendSuccessResult("lfpercentage", percentage);
-  }
-
-  @Override
-  public void onFPSChange(long fps) {
+  public void onFPSChanged(int fps) {
     Log.d(TAG, "onFPSChange:" + String.valueOf(fps));
     sendSuccessResult("fps", fps);
   }
 
   @Override
-  public void onError(Monitor.ERROR e) {
+  public void onError(Error e) {
     Log.e(TAG, "onError:" + String.valueOf(e));
     String error = "";
-    if (e == Monitor.ERROR.NO_FINGER_DETECTED) {
+    if (e == Error.NoFingerDetected) {
       error = "NO_FINGER_DETECTED";
-    } else if (e == Monitor.ERROR.CAMERA_HAS_NO_PERMISSION) {
+    } else if (e == Error.CameraHasNoPermission) {
       error = "CAMERA_HAS_NO_PERMISSION";
-    } else if (e == Monitor.ERROR.FLASH_HAS_NO_PERMISSION) {
+    } else if (e == Error.FlashHasNoPermission) {
       error = "FLASH_HAS_NO_PERMISSION";
-    } else if (e == Monitor.ERROR.BAD_PACKAGE_NAME) {
+    } else if (e == Error.InvalidLicense) {
       error = "BAD_PACKAGE_NAME";
-    } else if (e == Monitor.ERROR.FPS_TO_LOW) {
-      error = "FPS_TOO_LOW";
-    } else if (e == Monitor.ERROR.ACCELEROMETER_HAS_NO_PERMISSION) {
+    } else if (e == Error.AccelerometerHasNoPermission) {
       error = "ACCELEROMETER_HAS_NO_PERMISSION";
-    } else if (e == Monitor.ERROR.LOW_BATTERY) {
+    } else if (e == Error.LowBattery) {
       error = "LOW_BATTERY";
+    } else if (e == Error.BadQuality) {
+      error = "BAD_QUALITY";
+    } else if (e == Error.TooMuchMovement) {
+      error = "TOO_MUCH_MOVEMENT"
     }
     sendErrorResult("error", error);
   }
 
   @Override
-    public void onWarning(Monitor.WARNING w) {
-      Log.e(TAG, "onWarning:" + String.valueOf(w));
-      String warning = "";
-      if (w == Monitor.WARNING.SHAKING) {
-        warning = "SHAKING";
-      }
-      sendSuccessResult("warning", warning);
+  public void onWarning(Warning w) {
+    Log.e(TAG, "onWarning:" + String.valueOf(w));
+    String warning = "";
+    if (w == Warning.MovementDetected) {
+      warning = "SHAKING";
+    } else if (w == Warning.LowQuality) {
+      warning = "LOW_QUALITY";
+    } else if (w == Warning.LowFps) {
+      warning = "LOW_FPS";
+    }
+
+    sendSuccessResult("warning", warning);
   };
 
 
   @Override
-  public void onStatusChange(Monitor.STATUS s) {
+  public void onStatusChanged(Status s) {
     Log.d(TAG, "onStatusChange:" + String.valueOf(s));
     String status = "ERROR";
-    if (s == Monitor.STATUS.STARTED) {
+    if (s == Status.Started) {
       status = "STARTED";
-    } else if (s == Monitor.STATUS.STOPPED) {
-      status = "STOPPED";
-    } else if (s == Monitor.STATUS.FINGER_DETECTED) {
+    } else if (s == Status.FingerDetected) {
       status = "FINGER_DETECTED";
-    } else if (s == Monitor.STATUS.CALIBRATING) {
+    } else if (s == Status.Calibrating) {
       status = "CALIBRATING";
-    } else if (s == Monitor.STATUS.MEASURING) {
+    } else if (s == Status.Measuring) {
       status = "MEASURING";
-    } else if (s == Monitor.STATUS.COMPLETED) {
+    } else if (s == Status.Completed) {
       status = "COMPLETED";
-    } else if (s == Monitor.STATUS.ERROR) {
+    } else if (s == Status.Error) {
       status = "ERROR";
-    } else if (s == Monitor.STATUS.NO_FINGER) {
+    } else if (s == Status.NoFinger) {
       status = "NO_FINGER";
-    } else if (s == Monitor.STATUS.INACCURATE_MEASUREMENT) {
-      status = "INACCURATE_MEASUREMENT";
-    } else if (s == Monitor.STATUS.LOW_RED_VALUE) {
-      status = "LOW_RED_VALUE";
     }
     if (status == "ERROR" || status == "COMPLETED") {
       allowScreenToSleep();
@@ -441,19 +348,12 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
     sendSuccessResult("status", status);
   }
 
-  @Override
-  public void onBeatSignalStrength(double signal) {
-    Log.d(TAG, "onBeatSignalStrength:" + String.valueOf(signal));
-    // if (signal > 0) {
-    //   sendSuccessResult("signal", signal);
-    // }
-  }
 
   @Override
-  public void onPPGCanvasUpdate(Bitmap bitmap) {  }
+  public void onGraphImageUpdated(Bitmap bitmap) {  }
 
   @Override
-  public void onPPGDataUpdate(double[] ppgData) {
+  public void onGraphDataUpdated(double[] ppgData) {
     if (ppgData.length == 0) {
       return;
     }
@@ -467,8 +367,35 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartBeatListener 
   }
 
   @Override
-  public void onPercentageCompleted(int percentage) {
-    sendSuccessResult("progress", percentage);
+  public void onProgressUpdated(int percentageCompleted, int timeProgressed, int timeRemaining) {
+    Log.d(TAG, "onProgressUpdated:" + percentageCompleted + " timeProgressed: " + timeProgressed + " timeRemaining: " + timeRemaining);
+    JSONObject result = new JSONObject();
+    try {
+      result.put("percentageCompleted", percentageCompleted);
+      result.put("timeProgressed", timeProgressed);
+      result.put("timeRemaining", timeRemaining);
+
+      sendSuccessResult("progress", result);
+    } catch (JSONException e) {
+      Log.e(TAG, "could not serialize progress update");
+    }
+  }
+
+  @Override
+  public void onTimeHRVUpdated(@NotNull TimeHRV timeHRV) {}
+
+  @Override
+  public void onFrequencyHRVUpdated(@NotNull FrequencyHRV frequencyHRV) {
+    Log.d(TAG, "onFrequencyHRVUpdated:" + String.valueOf(frequencyHRV));
+    JSONObject result = new JSONObject();
+    try {
+      result.put("lfPercentage", frequencyHRV.getLowFrequencyPercentage());
+      result.put("confidenceLevel", frequencyHRV.getConfidenceLevel());
+
+      sendSuccessResult("lfpercentage", result);
+    } catch (JSONException e) {
+      Log.e(TAG, "could not serialize frequency HRV update");
+    }
   }
 
 }
