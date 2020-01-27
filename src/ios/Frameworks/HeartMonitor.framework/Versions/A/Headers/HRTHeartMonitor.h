@@ -55,7 +55,7 @@ typedef NS_ENUM(NSInteger, HRTExportType) {
 - (void)onWarning:(HRTWarning)warning;
 - (void)onError:(HRTError)error;
 - (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV;
-- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV classificatonResults:(NSMutableArray *)results; // TODO: - Remove for medopad
+
 
 @optional
 - (void)onHeartrateUpdated:(HRTHeartRate *)heartRate;

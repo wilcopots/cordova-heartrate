@@ -260,9 +260,4 @@
   [self sendResultQueue];
 }
 
-- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV classificatonResults:(NSMutableArray *)results {
-    NSLog(@"HeartbeatPlugin - onMeasurementCompleted classificatonResults");
-}
-
-
 @end
