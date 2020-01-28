@@ -302,7 +302,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
     } else if (e == Error.BadQuality) {
       error = "BAD_QUALITY";
     } else if (e == Error.TooMuchMovement) {
-      error = "TOO_MUCH_MOVEMENT"
+      error = "TOO_MUCH_MOVEMENT";
     }
     sendErrorResult("error", error);
   }
