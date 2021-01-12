@@ -94,6 +94,10 @@ Heartbeat.prototype.checkPermissions = function(success, fail) {
 	exec(success, fail, 'Heartbeat', 'checkPermissions', []);
 };
 
+Heartbeat.prototype.getVersion = function(success, fail) {
+	exec(success, fail, 'Heartbeat', 'getVersion', []);
+};
+
 // Payload.resulttype is used and returned from Android (because the payload.type is reserved)
 Heartbeat.prototype.successCallback = function(payload) {
   console.log('successCallBack received', JSON.stringify(payload));

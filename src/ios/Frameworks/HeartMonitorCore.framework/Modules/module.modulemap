@@ -1,0 +1,6 @@
+framework module HeartMonitorCore {
+  umbrella header "HeartMonitorCore.h"
+
+  export *
+  module * { export * }
+}

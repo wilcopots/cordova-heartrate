@@ -1,5 +1,6 @@
 #import "HeartbeatPlugin.h"
-#import <HeartMonitor/HRTHeartMonitor.h>
+#import <HeartMonitorCore/HeartMonitorCore.h>
+#import <HRVSDK/HRVSDK.h>
 
 @interface HeartbeatPlugin()<HRTHeartMonitorDelegate>
 
@@ -16,11 +17,7 @@
   NSLog(@"HeartbeatPlugin - initialize");
   [self setResultQueue:[[NSMutableArray alloc] init]];
   [self setResultDictionary:[[NSMutableDictionary alloc] init]];
-  [self setHeartMonitor:[[HRTHeartMonitor alloc] init]];
-  [[self heartMonitor] setDelegate:self];
-  // Since we're not using the HRV yet we can decrease the measure time
-  [[self heartMonitor] setMeasurementTimeSeconds:30];
-
+  [self setHeartMonitor:[[HRTHeartMonitor alloc] initWithDelegate:self measurementTimeSeconds:30]];
 }
 
 - (void)start:(CDVInvokedUrlCommand*)command {
@@ -48,6 +45,13 @@
   NSLog(@"HeartbeatPlugin - setMeasureTime");
   [[self heartMonitor] setMeasurementTimeSeconds:[[command argumentAtIndex:0] intValue]];
   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+  [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
+}
+
+- (void)getVersion:(CDVInvokedUrlCommand*)command {
+  NSLog(@"HeartbeatPlugin - getVersion");
+  NSString* version = [[self heartMonitor] getVersion];
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:version];
   [[self commandDelegate] sendPluginResult:pluginResult callbackId:[command callbackId]];
 }
 
@@ -246,7 +250,7 @@
   [self sendResultQueue];
 }
 
-- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV {
+- (void)onMeasurementCompleted:(HRTHeartRate *)heartRate timeHRV:(HRTTimeHRV *)timeHRV frequencyHRV:(HRTFrequencyHRV *)frequencyHRV stressIndex:(NSInteger)stressIndex {
   NSLog(@"HeartbeatPlugin - onHRVReady");
   NSDictionary * result = @{
     @"sd": [NSNumber numberWithInt:timeHRV.SDNN],
@@ -255,7 +259,8 @@
     @"avnn": [NSNumber numberWithInt:timeHRV.AVNN],
     @"confidenceLevel": [NSNumber numberWithInt:timeHRV.confidenceLevel],
     @"bpm": [NSNumber numberWithInt:heartRate.BPM],
-    @"lfpercentage": [NSNumber numberWithDouble:frequencyHRV.lowFrequencyPercentage]
+    @"lfpercentage": [NSNumber numberWithDouble:frequencyHRV.lowFrequencyPercentage],
+    @"stressindex": [NSNumber numberWithInt:stressIndex],
   };
   [self sendSuccessResultWithType:@"hrv" andDictionary:result];
   [self sendResultQueue];

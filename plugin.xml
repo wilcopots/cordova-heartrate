@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat2" version="0.0.32">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-heartbeat2" version="0.0.35">
   <name>HeartbeatPlugin</name>
   <description>Heartbeat plugin</description>
 
@@ -36,7 +36,8 @@
     </config-file>
     <header-file src="src/ios/HeartbeatPlugin.h" target-dir="HeartbeatPlugin"/>
     <source-file src="src/ios/HeartbeatPlugin.m" target-dir="HeartbeatPlugin"/>
-    <framework src="src/ios/Frameworks/HeartMonitor.framework" custom="true"/>
+    <framework src="src/ios/Frameworks/HRVSDK.framework" custom="true" embed="true"/>
+    <framework src="src/ios/Frameworks/HeartMonitorCore.framework" custom="true" embed="true"/>
     <preference name="CAMERA_USAGE_DESCRIPTION" default=" "/>
     <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
       <string>Measure your heartbeat by using the camera and flash.</string>

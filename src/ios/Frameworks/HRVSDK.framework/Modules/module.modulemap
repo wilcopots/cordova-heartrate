@@ -1,0 +1,6 @@
+framework module HRVSDK {
+  umbrella header "HRVSDK.h"
+
+  export *
+  module * { export * }
+}
