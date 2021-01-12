@@ -68,8 +68,9 @@
 - (void)sendErrorResultWithType:(NSString *)type andMessage:(NSString *)message {
   NSLog(@"HeartbeatPlugin - sendErrorResultWithType");
   dispatch_async(dispatch_get_main_queue(), ^{
-    if (message != nil) {
-      CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
+    if (type != nil && message != nil) {
+      NSDictionary * payload = @{@"resulttype": type, @"message": message};
+      CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:payload];
       [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
       if (_mainCallbackId != nil) {
         [[self commandDelegate] sendPluginResult:pluginResult callbackId:_mainCallbackId];
