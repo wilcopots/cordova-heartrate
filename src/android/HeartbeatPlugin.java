@@ -75,6 +75,9 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
     } else if (action.equals("checkPermissions")) {
       checkPermissions(callbackContext);
       return true;
+    } else if (action.equals("getVersion")) {
+      getVersion(callbackContext);
+      return true;
     }
 
     return false;
@@ -134,6 +137,16 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
       callbackContext.error("could not serialize result for callback");
     }
     Log.d(TAG, "Set measure time: " + measureTime);
+  }
+
+  /**
+   * Get current HeartMonitor SDK version.
+   */
+  protected void getVersion(final CallbackContext callbackContext) {
+    Log.i(TAG, "getVersion");
+    String version = monitor.getVersion();
+    PluginResult result = new PluginResult(PluginResult.Status.OK, version);
+    callbackContext.sendPluginResult(result);
   }
 
   private void keepScreenAwake() {
@@ -253,7 +266,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
   }
 
   @Override
-  public void onMeasurementCompleted(@NotNull HeartRate heartRate, @NotNull TimeHRV timeHRV, @NotNull FrequencyHRV frequencyHRV) {
+  public void onMeasurementCompleted(@NotNull HeartRate heartRate, @NotNull TimeHRV timeHRV, @NotNull FrequencyHRV frequencyHRV, int stressIndex) {
     Log.d(TAG, "onHRVReady:" + String.valueOf(heartRate));
     JSONObject result = new JSONObject();
     try {
@@ -264,6 +277,7 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
       result.put("pnn50", timeHRV.getPNN50());
       result.put("confidenceLevel", heartRate.getConfidenceLevel());
       result.put("lfpercentage", frequencyHRV.getLowFrequencyPercentage());
+      result.put("stressindex", stressIndex);
 
       sendSuccessResult("hrv", result);
     } catch (JSONException e) {
@@ -303,6 +317,10 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
       error = "BAD_QUALITY";
     } else if (e == Error.TooMuchMovement) {
       error = "TOO_MUCH_MOVEMENT";
+    } else if (e == Error.ShortDuration) {
+      error = "SHORT_DURATION";
+    } else if (e == Error.AbortMeasurement) {
+      error = "ABORTED_MEASUREMENT";
     }
     sendErrorResult("error", error);
   }
@@ -341,6 +359,8 @@ public class HeartbeatPlugin extends CordovaPlugin implements HeartListener {
       status = "ERROR";
     } else if (s == Status.NoFinger) {
       status = "NO_FINGER";
+    } else if (s == Status.BadFingerPosition) {
+      status = "BAD_FINGER_POSITION";
     }
     if (status == "ERROR" || status == "COMPLETED") {
       allowScreenToSleep();

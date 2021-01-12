@@ -1,6 +1,6 @@
 {
   "name": "cordova-heartbeat2",
-  "version": "0.0.35",
+  "version": "0.0.38",
   "description": "Heartbeat cordova plugin",
   "main": "www/heartbeat.js",
   "scripts": {
